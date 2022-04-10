@@ -7,9 +7,82 @@ output:
     highlight: textmate
     theme: darkly
 ---
-# Darwins Frog Monomorphic Call Structure And Dimorphic vocal phenology
-Serrano, J. M., Penna, M., Valenzuela-Sánchez, A., Mendez, M. A., & Azat, C. (2020). Monomorphic call structure and dimorphic vocal phenology in a sex-role reversed frog. _Behavioral Ecology and Sociobiology, 74_(10), 127. (<https://doi.org/10.1007/s00265-020-02903-3>)
+```{r setup, include=FALSE}
+# These are some {knitr} options I typically use to format my ***RMarkdown*** documents in a consistent way
+# You should feel free to alter these or use other "chunk options" as you see fit!
+# Sometimes, for example, you might want to suppress warnings or
+# messages, and that behavior can be set for specific code chunks in
+# the chunk header, e.g., ```{r warning = FALSE, echo = FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE, # run code in code chunks
+  echo = TRUE, # render output of code chunks
+  warning = TRUE, # do not suppress "warnings"
+  message = TRUE, # do not suppress "messages"
+  comment = "##", # prefix for comment lines
+#  prompt = ">", # prefix for code lines
+  tidy = TRUE,
+  tidy.opts = list(blank = FALSE, width.cutoff = 75),
+  fig.path = "images/", # name of folder for images
+  fig.align = "center" # centers any images on the page
+)
+```
 
-## Report on Article:\
-(report on the article)
+# Darwins Frog Monomorphic Call Structure And Dimorphic vocal phenology\
 
+
+**Preliminaries:**
+```{r Preliminaries, message=FALSE}
+library(tidyverse)
+library(ggplot2) # for pretty plots
+library(dplyr) # for %>% 
+library(infer) # for statistics
+library(tidyr) # nice tables that look nice
+library(formatR) #to format R
+```
+
+
+## Introduction:\
+```{r echo=FALSE, width="300px", message=FALSE}
+library(knitr) # for inserting images
+include_graphics("images/Cornett_2019_Darwin's_Frog.JPG")
+```
+[Include a brief summary of the paper you are reanalyzing data from (e.g., the overall objective of the paper, the types of data collected and how sampling was done, what the main results were) and lay out what you intend to replicate.]
+
+
+
+## Visualization of Data\
+[Include a view of the first few lines of the dataset plus any exploratory data analysis - e.g., overview of descriptive statistics included in the paper, plots, etc.]
+
+**load in dataset:**
+```{r load in dataset}
+f <- "https://raw.githubusercontent.com/slcornett/data-analysis-replication/main/data/Serrano_et_al_2020_MPMH.csv"
+d <- read_csv(f, col_names = TRUE, show_col_types = FALSE) # show column names, hides dataframe message details
+head(d)
+# Peso = weight; sexo = sex shorthand (MP = pregnant male, H = female, M = non-pregnant male); Calls5min = calls in 5 min interval; Nombre =  name given to ID the frog <3; Captura =\
+# Track = the call recording track; Temp = internal frog temperature (ºC);
+# HR =\
+# Larvas = number of bbies in their mouth!\
+# LHC =\
+# SPL =\ 
+# NC =\
+# ND =\  
+# CD =\  
+# Agg Entropy =\
+# Avg Entropy =\
+# DF =\
+# RMS Amp =\
+```
+
+
+## Statistical Replications/Reanalysis
+[Be sure to **thoroughly** explain what replications you are doing and comment your code so that it is easy for a reader to understand. Include in this section relevant tables/figures/values from the original paper for comparison to what you accomplished with your replication. Note that I want you to do the bulk of any *exposition* using text and markdown syntax outside of code blocks. That is, your document should not just be one big code block with ***R*** style comments but rather a nicely formatted report with code separated from exposition, interpretation, and dicussion.]
+
+## Summary/Discussion
+Narrative section that overviews how successful were you at replicating the analyses and visualizations in the study.\
+1. What problems did you encounter?  
+2. Why might you have encountered those problems?  
+3. What details were lacking from the original study's methods that might have hampered your ability to replicate the authors' results?  
+
+## References\
+[Include the citation for your paper, plus any other literature you might reference.]
+Serrano, J. M., Penna, M., Valenzuela-Sánchez, A., Mendez, M. A., & Azat, C. (2020). Monomorphic call structure and dimorphic vocal phenology in a sex-role reversed frog. _Behavioral Ecology and Sociobiology, 74_(10), 127. <https://doi.org/10.1007/s00265-020-02903-3>\
