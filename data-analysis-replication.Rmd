@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
   echo = TRUE, # render output of code chunks
   warning = TRUE, # do not suppress "warnings"
   message = TRUE, # do not suppress "messages"
-  comment = "##", # prefix for comment lines
+#  comment = "##", # prefix for comment lines
 #  prompt = ">", # prefix for code lines
   tidy = TRUE,
   tidy.opts = list(blank = FALSE, width.cutoff = 75),
@@ -37,7 +37,9 @@ library(ggplot2) # for pretty plots
 library(dplyr) # for %>% 
 library(infer) # for statistics
 library(tidyr) # nice tables that look nice
+library(car) # ANOVA
 library(formatR) #to format R
+library(MASS) # reported used for normalizing data for ANOVA
 ```
 
 
@@ -58,20 +60,14 @@ include_graphics("images/Cornett_2019_Darwin's_Frog.JPG")
 f <- "https://raw.githubusercontent.com/slcornett/data-analysis-replication/main/data/Serrano_et_al_2020_MPMH.csv"
 d <- read_csv(f, col_names = TRUE, show_col_types = FALSE) # show column names, hides dataframe message details
 head(d)
-# Peso = weight; sexo = sex shorthand (MP = pregnant male, H = female, M = non-pregnant male); Calls5min = calls in 5 min interval; Nombre =  name given to ID the frog <3; Captura =\
-# Track = the call recording track; Temp = internal frog temperature (ºC);
-# HR =\
-# Larvas = number of bbies in their mouth!\
-# LHC =\
-# SPL =\ 
-# NC =\
-# ND =\  
-# CD =\  
-# Agg Entropy =\
-# Avg Entropy =\
-# DF =\
-# RMS Amp =\
 ```
+> **DESCRIPTIVE VARIABLES:**  Nombre =  name given to ID the frog <3; sexo = sex shorthand (MP = pregnant male, H = female, M = non-pregnant male); Captura = number captured
+Track = the call recording track\
+HR =\
+Larvas = number of babes in their mouth!\ 
+> **PHYSICAL MEASUREMENTS:** Peso = weight/mass (g); LHC = longitud hocico a cola (snout-vent length, mm); Temp = internal frog temperature (ºC)\
+> **ACOUSTIC VARIABLES:** Calls5min = calls in 5 min interval (call repetition rate); SPL = Sound Pressure Level (dB); NC = number of notes/call; ND = note duration (ms); CD = call duration (s); Agg Entropy = aggregate entropy; Avg Entropy = average entropy; DF = dominant frequency of call (Hz)\
+ RMS Amp = Root Mean Square Amplitude
 
 
 ## Statistical Replications/Reanalysis
