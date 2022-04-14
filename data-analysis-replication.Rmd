@@ -6,6 +6,9 @@ output:
   html_document: 
     highlight: textmate
     theme: darkly
+    code_folding: show
+    toc: TRUE
+    toc_float: TRUE
 ---
 ```{r setup, include=FALSE}
 # These are some {knitr} options I typically use to format my ***RMarkdown*** documents in a consistent way
@@ -28,41 +31,40 @@ knitr::opts_chunk$set(
 ```
 
 # Darwins Frog Monomorphic Call Structure And Dimorphic vocal phenology\
-
-
-**Preliminaries:**
 ```{r Preliminaries, message=FALSE}
-library(tidyverse)
-library(ggplot2) #  pretty plots
-library(dplyr) # dataframe manipulations and  %>% 
-library(infer) #  statistics
-library(tidyr) # nice tables that look nice
-library(car) # ANOVA 
-library(formatR) #to format R
-library(knitr) # inserting images
-library(kableExtra) # modifying kable tables
-library(MASS) # reported used for normalizing data for ANOVA
+#require = will install and load, library can only load installed packages
+require(tidyverse)
+require(ggplot2) #  pretty plots
+require(dplyr) # dataframe manipulations and  %>% 
+require(infer) #  statistics
+require(tidyr) # nice tables that look nice
+require(car) # ANOVA, also used by the authors for ANOVA
+require(MASS) # reported used for normalizing data for ANOVA
+require(formatR) #to format R
+require(knitr) # inserting images
+require(kableExtra) # modifying kable tables
+require(skimr) # for data overview, data visualization 
 ```
 
 
 ## introduction:\
 [Include a brief summary of the paper you are reanalyzing data from (e.g., the overall objective of the paper, the types of data collected and how sampling was done, what the main results were) and lay out what you intend to replicate.]\
 ```{r echo=FALSE, width="300px", message=FALSE}
-include_graphics("images/Cornett_2019_Darwin's_Frog.JPG")
+include_graphics("images/Cornett_2019_Darwin's_Frog.JPG") #cool frog photo by me
 ```
 
-##### **background**\
-The southern Darwin's frog (*Rhinoderma darwinii*) mouth-brooding frog species endemic to Chilean Patagonia. *R. darwinii* has a fascinating method for reproduction: the female (egg-producer) deposits eggs and  the male (sperm-producer) fertilizes them, then guards them until the embryos are visibly wriggling inside. Then the male transfers those eggs to their vocal sac where they will be safe from predators and receive nutrients from the male (similar to marsupial embryonic development in their pouch). Ultimately, the male broods these fertilized eggs, often from multiple clutches with different partners, in their vocal sacs for about 50 days, until fully developed froglets emerge by pushing their way out the male’s mouth! All a while during this gestation period, the male continues to call for mates (Sandmeier, 2016)! There are 3 sex roles in this species: pregnant male (MP), non-pregnant male (M or NPM), and female (H or F), and the main sexually dimporphic characteristic is size, where the egg-producers are slightly larger. In this nearly sexually monomorphic (i.e., the sexes look physically identical) species, mate selection depends on advertising calls, and *R. darwinii* is one of the few species where all sexes (PM, NPM, and F) use advertising calls to attract the attention of a potential mate (Serrano et al., 2020).\
+#### **background**\
+The southern Darwin's frog (*Rhinoderma darwinii*) mouth-brooding frog species endemic to Chilean Patagonia. *R. darwinii* has a fascinating method for reproduction: the female (egg-producer) deposits eggs and  the male (sperm-producer) fertilizes them, then guards them until the embryos are visibly wriggling inside. Then the male transfers those eggs to their vocal sac where they will be safe from predators and receive nutrients from the male (similar to marsupial embryonic development in their pouch). Ultimately, the male broods these fertilized eggs, often from multiple clutches with different partners, in their vocal sacs for about 50 days, until fully developed froglets emerge by pushing their way out the male’s mouth! All a while during this gestation period, the male continues to call for mates (Sandmeier, 2016)! There are 3 sex roles in this species: pregnant male (MP), non-pregnant male (M or NPM), and female (H or F), and the main sexually dimorphic characteristic is size, where the egg-producers are slightly larger. In this nearly sexually monomorphic (i.e., the sexes look physically identical) species, mate selection depends on advertising calls, and *R. darwinii* is one of the few species where all sexes (PM, NPM, and F) use advertising calls to attract the attention of a potential mate (Serrano et al., 2020).\
 
-##### **hypothesis**\
-To address the gap in the literature regarding the calling behaviors of female *R. darwinii*, Serrano et al. (2020) hypothesized the time fluctuation of the each sex experiencing intasexual competition dictates the species position on the continuum of sexual monomorphism to dimorphism. 
-
+#### **hypothesis**\
+To address the gap in the literature regarding the calling behaviors of female *R. darwinii*, Serrano et al. (2020) hypothesized the time fluctuation of the each sex experiencing intrasexual competition dictates the species position on the continuum of sexual monomorphism to dimorphism.  {**does my rephrasing make as much sense as the original/does it convey the original?**}
 [the position along the monomorphism-dimorphism continuum of sexual signals depends on the time fluctuation of the sex experiencing intrasexual competition]
 
-##### **methods**\
-They investigated this with a population of southern *R. darwinii* on Chiolé Island in Southern Chile during mating season (October 2015-February 2016). In the field, they first recorded individual calls (tracks) then collected population monitoring data (snout-vent length (mm), SVL; weight (g); internal temperature(ºC)). They also collected data on the sex and sexual status (MP = pregnant male, H = female, M = non-pregnant male) of each frog caught using body size and morphological characteristics. For the pregnant males, they counted externally the number of larvae in the vocal sacs. For each call recordings, they measured the call repetition rate (number of calls made in a 5 min period), the sound pressure level (SPL, dB), call duration (CD, seconds), the number of notes per call (NC), the note duration (ND, ms), the dominant frequency of the call (DF, Hz); and the amplitude of each vocalization (root mean square (RMS) amplitude). 
+#### **methods**\
+They investigated this with a population of southern *R. darwinii* on Chiolé Island in Southern Chile during mating season (October 2015-February 2016). In the field, they first recorded individual calls (tracks) then collected population monitoring data (snout-vent length, SVL (mm); weight (g)). They also collected data on the sex and sexual status (MP = pregnant male, H = female, M = non-pregnant male) of each frog caught using body size and morphological characteristics. For the pregnant males, they counted externally the number of larvae in the vocal sacs. For each call recordings, they measured the call repetition rate (CRR, number of calls made in a 5 min period after the first call produced), the sound pressure level (SPL, dB), call duration (CD, seconds), the number of notes per call (NC), the note duration (ND, ms), the dominant frequency of the call (DF, Hz); and the amplitude of each vocalization (root mean square (RMS) amplitude) (Serrano et al., 2020).\
+The authors used *Simple Pearson correlations* to explore the association used to explore association between **acoustic variables of the calls (CRR, SPL, CD, NC, ND, DF)** with **physical characteristic variables (SVL, weight)**. They used *Spearman correlations* to determine the association between **acoustic properties of the calls of pregnant males** and the **number of tadpoles in their vocal sacs**
 
-##### **results**\
+#### **results**\
 
 
 ### **data replication**\
@@ -78,16 +80,27 @@ lay out what you intend to replicate.
 ```{r load in dataset}
 f <- "https://raw.githubusercontent.com/slcornett/data-analysis-replication/main/data/Serrano_et_al_2020_MPMH.csv"
 d <- read_csv(f, col_names = TRUE, show_col_types = FALSE) # show column names, hides dataframe message details
-kable(head(d), align = 'l', booktabs = TRUE) %>% # to make a table, left aligned data, output of head(d)
-  kable_styling(font_size = 9) # specifying font size
-
-skim(d)
+```
+**data summary statistics**
+```{r data summary}
+# Data summary 
+s <- skim(d) # to make a summary table of skim(d) output
+# character data
+s %>% dplyr::filter(skim_type == "character") %>% 
+  dplyr::select(skim_variable, n_missing, character.min, character.max, character.empty, character.n_unique) %>% 
+  kable(align = 'l', booktabs = TRUE) %>% 
+  kable_styling(font_size = 9, full_width = FALSE)
+# numeric data modify the specific output
+s %>% dplyr::filter(skim_type == "numeric") %>%
+  dplyr::select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p50, numeric.p75, numeric.p100, numeric.hist) %>%
+  kable(align = 'l', booktabs = TRUE) %>% # left aligned data
+  kable_styling(font_size = 9, full_width = FALSE) # font-size
+detach(package:skimr)
 ```
 • **DESCRIPTIONS/IDENTIFIERS:**   
   - Nombre =  name given to ID the frog;\
   - Captura = number captured/image name;\
   - Track = the call recording track\
-
 • **PHYSICAL MEASUREMENTS:**  
   - sexo = sexual status (MP = pregnant male, H = female, M = non-pregnant male)\
   - peso = mass (g);\
@@ -95,7 +108,6 @@ skim(d)
   - temp = temperature (ºC);\
   - HR = relative humidity;\
   - larvas = number of tadpoles/offspring in their parent's mouth!\
-
 • **ACOUSTIC VARIABLES:**  
   - Calls5min = calls in 5 min interval (call repetition rate);\ 
   - SPL = Sound Pressure Level (dB);\ 
@@ -103,12 +115,24 @@ skim(d)
   - ND = note duration (ms);\
   - CD = call duration (s);\
   - Agg Entropy = aggregate entropy;\
-  - Avg Entropy = average entropy;\ 
+  - Avg Entropy = average entropy;\
   - DF = dominant frequency of call (Hz);\
   - RMS Amp = Root Mean Square Amplitude\
 
 ## Statistical Replications/Reanalysis
-[Be sure to **thoroughly** explain what replications you are doing and comment your code so that it is easy for a reader to understand. Include in this section relevant tables/figures/values from the original paper for comparison to what you accomplished with your replication. Note that I want you to do the bulk of any *exposition* using text and markdown syntax outside of code blocks. That is, your document should not just be one big code block with ***R*** style comments but rather a nicely formatted report with code separated from exposition, interpretation, and dicussion.]
+>Be sure to **thoroughly** explain what replications you are doing and comment your code so that it is easy for a reader to understand. Include in this section relevant tables/figures/values from the original paper for comparison to what you accomplished with your replication. Note that I want you to do the bulk of any *exposition* using text and markdown syntax outside of code blocks. That is, your document should not just be one big code block with ***R*** style comments but rather a nicely formatted report with code separated from exposition, interpretation, and discussion.]\
+
+### Table 1: Average ± SD of Body Size and Acoustic Features for *R. darwinii*\
+ANOVA
+
+### Figure 3: (a) Note Duration (b) 
+visualization
+
+• descriptive statistical analysis
+• one visualization
+• one inferential statistical analysis
+
+
 
 ## Summary/Discussion
 Narrative section that overviews how successful were you at replicating the analyses and visualizations in the study.\
@@ -117,7 +141,6 @@ Narrative section that overviews how successful were you at replicating the anal
 3. What details were lacking from the original study's methods that might have hampered your ability to replicate the authors' results?  
 
 ## References\
-[Include the citation for your paper, plus any other literature you might reference.]
-Sandmeier, F. (2016). *Rhinoderma darwinii* [Encyclopedia]. AmphibiaWeb; University of California, Berkeley, CA, USA. <https://amphibiaweb.org/species/4322>\
+• Sandmeier, F. (2016). *Rhinoderma darwinii* [Encyclopedia]. AmphibiaWeb; University of California, Berkeley, CA, USA. <https://amphibiaweb.org/species/4322>\
 
-Serrano, J. M., Penna, M., Valenzuela-Sánchez, A., Mendez, M. A., & Azat, C. (2020). Monomorphic call structure and dimorphic vocal phenology in a sex-role reversed frog. _Behavioral Ecology and Sociobiology, 74_(10), 127. <https://doi.org/10.1007/s00265-020-02903-3>\
+• Serrano, J. M., Penna, M., Valenzuela-Sánchez, A., Mendez, M. A., & Azat, C. (2020). Monomorphic call structure and dimorphic vocal phenology in a sex-role reversed frog. _Behavioral Ecology and Sociobiology, 74_(10), 127. <https://doi.org/10.1007/s00265-020-02903-3>\
