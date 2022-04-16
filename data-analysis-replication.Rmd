@@ -61,7 +61,7 @@ To address the gap in the literature regarding the calling behaviors of female *
 [the position along the monomorphism-dimorphism continuum of sexual signals depends on the time fluctuation of the sex experiencing intrasexual competition]
 
 #### **methods**\
-They investigated this with a population of southern *R. darwinii* on Chiolé Island in Southern Chile during mating season (October 2015-February 2016). In the field, they first recorded individual calls (tracks) then collected population monitoring data (snout-vent length, SVL (mm); weight (g)). They also collected data on the sex and sexual status (MP = pregnant male, H = female, M = non-pregnant male) of each frog caught using body size and morphological characteristics. For the pregnant males, they counted externally the number of larvae in the vocal sacs. For each call recordings, they measured the call repetition rate (CRR, number of calls made in a 5 min period after the first call produced), the sound pressure level (SPL, dB), call duration (CD, seconds), the number of notes per call (NC), the note duration (ND, ms), the dominant frequency of the call (DF, Hz); and the amplitude of each vocalization (root mean square (RMS) amplitude) (Serrano et al., 2020).\
+They investigated this with a population of southern *R. darwinii* on Chiolé Island in Southern Chile during mating season (October 2015-February 2016). Of the 118 adult frogs caught in the field, they recorded calls from 32 of them. In the field, they first recorded individual calls (tracks) then collected population monitoring data (snout-vent length, SVL (mm); weight (g)). They also collected data on the sex and sexual status (MP = pregnant male, H = female, M = non-pregnant male) of each frog caught using body size and morphological characteristics. For the pregnant males, they counted externally the number of larvae in the vocal sacs. For each call recordings, they measured the call repetition rate (CRR, number of calls made in a 5 min period after the first call produced), the sound pressure level (SPL, dB), call duration (CD, seconds), the number of notes per call (NC), the note duration (ND, ms), the dominant frequency of the call (DF, Hz); and the amplitude of each vocalization (root mean square (RMS) amplitude) (Serrano et al., 2020).\
 The authors used *Simple Pearson correlations* to explore the association used to explore association between **acoustic variables of the calls (CRR, SPL, CD, NC, ND, DF)** with **physical characteristic variables (SVL, weight)**. They used *Spearman correlations* to determine the association between **acoustic properties of the calls of pregnant males** and the **number of tadpoles in their vocal sacs**
 
 #### **results**\
@@ -89,12 +89,12 @@ s <- skim(d) # to make a summary table of skim(d) output
 s %>% dplyr::filter(skim_type == "character") %>% 
   dplyr::select(skim_variable, n_missing, character.min, character.max, character.empty, character.n_unique) %>% 
   kable(align = 'l', booktabs = TRUE) %>% 
-  kable_styling(font_size = 9, full_width = FALSE)
+  kable_styling(font_size = 10, full_width = FALSE)
 # numeric data modify the specific output
 s %>% dplyr::filter(skim_type == "numeric") %>%
   dplyr::select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p50, numeric.p75, numeric.p100, numeric.hist) %>%
   kable(align = 'l', booktabs = TRUE) %>% # left aligned data
-  kable_styling(font_size = 9, full_width = FALSE) # font-size
+  kable_styling(font_size = 10, full_width = FALSE) # font-size
 detach(package:skimr)
 ```
 • **DESCRIPTIONS/IDENTIFIERS:**   
