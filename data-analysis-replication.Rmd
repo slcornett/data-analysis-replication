@@ -44,7 +44,6 @@ require(formatR) #to format R
 require(knitr) # inserting images
 require(kableExtra) # modifying kable tables
 require(skimr) # for data overview, data visualization 
-require(data.table) #
 ```
 
 
@@ -208,7 +207,8 @@ include_graphics("images/Serrano_et_al_2020_Table1.png")
 ```
 
 
-The authors reported performing the following statistical analyses before performing their ANOVA. As mentioned before, they used **Simple Pearson Correlations** to determine if the different acoustic variables correlate with either **Snout-Vent Length (LHC, mm)** or **mass (g)** (Serrano et al., 2020). They also performed **Spearman Correlations** to determine an association between acoustic variables and the number of tadpoles in the vocal sacs of pregnant males (Serrano et al., 2020). Below, I repeat these tests.
+#### correlation tests
+The authors reported performing the following statistical analyses before performing their ANOVA. As mentioned before, they used **Simple Pearson Correlations** to determine if the different acoustic variables correlate with either **Snout-Vent Length (LHC, mm)** or **mass (g)** (Serrano et al., 2020). They also performed **Spearman Correlations** to determine an association between acoustic variables and the number of tadpoles in the vocal sacs of pregnant males (Serrano et al., 2020). Below, I conduct these tests. Ultimately, I do not find them as informative as the QQ Plots  above. 
 ```{r correlation tests}
 # SHOULD I TAKE THESE OUT? THEY AREN'T VERY INFORMATIVE. 
 
@@ -263,6 +263,7 @@ stats::cor(p.males$Larvas, p.males$`RMS Amp`, method = "spearman") # no correlat
 stats::cor(p.males$Larvas, p.males$CRR, method = "spearman") # no correlation
 ```
 
+#### quantile-quantile plots
 Serrano et al. (2020) first verified the normality criteria for all the variables in their data using quantile-quantile plots, likely to determine if any of their variables needed to be transformed before analyzing them with ANOVAs. Though they do not show these plots in their paper, I am replicating them below because the authors do not report which variables were transformed nor do they report how they were transformed, other than stating they used the Box Cox transformation.
 ```{r qq plots, message=FALSE, warning=FALSE}
 require(ggpubr) # for qqplots
@@ -302,14 +303,18 @@ detach(package:cowplot)
 ```
 Based on these plots, the two variables that appear to not fit the normality criteria for ANOVA are the two acoustic variables of entropy (**Average Entropy** and **Aggregated Entropy**). As the authors describe in their Statistical methods, I will transform these data useing a `boxcox()` from the {MASS} package to determine how to best transform these variables for ANOVA.
 
+
 #### Box-Cox transformations for non-normal variables in ANOVA
-Here, I run Box-Cox transformation for linear models/ANOVAS to determine how to transform variables not fitting normality criterion based on qqplot. The `boxcox()` function computes and plots the log-likelihood for an `object` to show the exponent power ($\lambda$) the response variable in the `object` should be raised to transform the `object` to fit normality criteria for comparison in ANOVA.\
+Here, I run Box-Cox transformation for linear models/ANOVAS to determine how to transform variables not fitting normality criterion based on qqplot. The `boxcox()` function computes and plots the log-likelihood for an `object` to show the exponent power ($\lambda$) the response variable in the `object` should be raised to transform the `object` to fit normality criteria for comparison in ANOVA. Based on the QQ plots above, the variables not meeting normality criteria are **Avg Entropy** and **Agg Entropy**, so I ran Box-Cox transformations on them to determine how to transform them for ANOVA. For each variable, I plotted the output to visualize what exponential power I should transform the variables, and added the transformed variables into the working dataframe (df).\
+Below are the arguments used in this function:\
   • The `object` argument is the response variables (**Avg Entropy** and **Agg Entropy**) against the predictor variables (**Sex** or **Sex**+**Snout-Vent Length (LHC)**) that will be compared in an ANOVA (or in a linear model, but not doing that here).
   • The `lambda` argument is the vector values to check as potential exponential powers to raise the variable to in a transformation. By default, the function uses (-2, 2) with 0.1 interval steps. Functionally, this is the x variable in the plot output.\
   • `plotit = ` is a logical argument, and when it is set to `TRUE`, it will output a plot of   the 95% confidence log-likelihood curve. Setting it to `FALSE` prints all the the x vakues and y values separately.\
-  • `interp` = 
-instead of fitting a single, high-degree polynomial to all of the values at once.
-spline interpolation fits low-degree polynomials to small subsets of the values
+  • `interp` = is a logical argument controlling if the *spline interpolation* is used or not. The spline interpolation fits low-degree polynomials to small subsets of the values, instead of fitting a single, high-degree polynomial to all of the values at once. You should use `TRUE` if plotting data with a lambda less than 100.\
+  • `eps` = defaults to 1/50 (0.02); this is the tolerance for lambda to be 0. (I used the default.)\
+  • `xlab` = defaults to $\lambda$  (I used the default).\
+  • `ylab` = defaults to "log-likelihood" (I used the default).\
+Below, you will see where I conducted these transformations on both the one-way model (Entropy ~ Sex) and the two-way model (Entropy ~ Sex+Snout-vent length); however, after running the ANOVAs on these acoustic variables, I found the authors did not use the comparisons of the acoustic variables to the different sexes corrected for SVL to generate their F-values. For this reason, I commented out those boxcox functions where I calculated how to transform the entropy variables for the two-way model below but you can see below how they would have worked and how I would have added those transformations to the working dataframe (df).
 ```{r boxcox transformation of non-normal variables for ANOVA}
 require(MASS) # reported used for normalizing data for ANOVA
 # boxcox of agg entropy vs sex.
@@ -336,9 +341,14 @@ df <- df %>% mutate(AvgE_t1 = (`Agg Entropy`)^(-1/10)) # adding column of transf
 
 
 #### Acoustic Variables (response variable) vs Sex (predictor variable)\
-In the methods, the authors reported using {car} package for Anova function (though they do not report the type). Below, for each acoustic variable included in Table 1, I fist make an ANOVA model (using the `aov()` function) of the acoustic variable to see if it varies between the three sexes (female (F), pregnant male (MP), non-pregnant male (NMP): `aov(data = df, [acoustic variable] ~ Sex)` I then print the summary of the original ANOVA model to compar the F statistic and level of significance to that reported in table 1. 
+In the methods, the authors reported using {car} package for Anova function (though they do not report the type). To replicate this, I started by working with the two entropy variables I found how to best transform for them to meet normality criteria of ANOVA. I have commented out the work with these variables that produced incorrect F-values, relative to that reported in Table 1. Such work includes running a one-way and two-way Anova model with transformed **Agg Entropy** against the sexes and against the sexes corrected for snout-vent length. I did the same with Avg Entropy. I also determined what type (I, II, or III) of ANOVA the authors used below, as you can see for the **Agg Entropy** and **Avg Entropy**. For these two variables, since the F-values and Sums of Squares of the untransformed Agg Entropy vs Sex for three types of ANOVA are the same regardless of the type, meaning the variables are balanced and factors are orthogonal, I proceeded with the remaining acoustic variables by just running the `aov()` function. This seemed fruitful as for each variable, I successfully replicated the exact F-value and level of significance reported in Table 1 by the authors.\
+Below, for each acoustic variable included in Table 1, I do the following: 
+1. I make an ANOVA model (using the `aov()` function) of the acoustic variable to see if it varies between the three sexes (female (F), pregnant male (MP), non-pregnant male (NMP). Sex is the predictor variable, and the acoustic variable is the response variable. Moreover, for Table 1, the authors do NOT correct by snout-vent length (i.e., Sex+SVL) as conducting this correction in the model gives a different F-value than what the authors report in table 1.:\
+`aov(data = df, [acoustic variable] ~ Sex)` 
+2. I then print the full summary of the original ANOVA model using the `summary.aov()`\
+3. then I pull out the F-value from the model summary, filtering for the variable **Sex** since I am comparing the acoustic variable between the three sexes
+4. I print the omnibus F-value so show that it has been isolated.
 ```{r ANOVA to generate F value for comparison of different sexes}
-#sex as predictor, NOT correcting by SVL = Sex+SVL as this gives a different F-value than what the authors report in table 1.
 # Snout-Vent Length (mm) between different Sexes.
 SVL_sex <- aov(data = df, LHC ~ Sex) # SVL = LHC
 summary.aov(SVL_sex) # print the model summary 
@@ -443,13 +453,29 @@ SPL_sex.F <- SPL_sex %>% # pull out the F-value
   generics::tidy() %>% # a nice table
   filter(term == "Sex") # since comparing between sexes
 SPL_sex.F$statistic # SPL F-value
+
+# dataframe of all the omnibus F-values from the above ANOVAs plus two empty columns so it will align with the Acoustics table below
+F.stat <- data.frame(sex = " ", #will correspond with sex
+                     n = " ", # will correspond with sex pop size
+                     svl.F = SVL_sex.F$statistic, # snout-vent length
+                     mass.F = mass_sex.F$statistic, # mass
+                     nd.F = ND_sex.F$statistic, # note duration
+                     cd.F = CD_sex.F$statistic, # call duration
+                     df.F = DF_sex.F$statistic, # dominant frequency
+                     aggE.F = AggE_sex.F$statistic, # aggregated entropy
+                     avgE.F = AvgE_sex.F$statistic, # avg entropy
+                     crr.F = CRR_sex.F$statistic, # call rep rate
+                     spl.F = SPL_sex.F$statistic) # sound pressure level
+F.stat
+detach(package:MASS)
 ```
 
 
-
-
 #### Mean, SD, and F statistic of weight, snout-vent length, and acoustic variables by Sex
-```{r Mean, SD of variables}
+Here, I replicate the Mean and Standard Deviations reported for each acoustic variable for each sex in Table 1. I do this by 
+```{r Mean ± SD, message=FALSE, warning=FALSE}
+#for making nice tables and doing data table manipulations
+require(data.table)
 # making a table of the calculated mean and standard deviation for each acoustic variable reported in Table 1
 bySex <- group_by(df, Sex)
 Acoustics <- bySex %>% 
@@ -459,7 +485,7 @@ Acoustics <- bySex %>%
             mean_mass = mean(Peso, na.rm = TRUE), # mean mass (g)
             sd_mass = sd(Peso, na.rm = TRUE), # sd mass
             mean_ND = mean(ND, na.rm = TRUE), # mean note duration (s)
-            sd_ND = sd(ND, na.rm = TRUE),
+            sd_ND = sd(ND, na.rm = TRUE), # sd note duration
             mean_CD = mean(CD, na.rm = TRUE), # mean call duration (s)
             sd_CD =  sd(CD, na.rm = TRUE),
             mean_DF = mean(DF, na.rm = TRUE), # mean dominant freq (Hz)
@@ -473,27 +499,37 @@ Acoustics <- bySex %>%
             mean_SPL = mean(SPL, na.rm = TRUE), # mean sound pressure level  (dB)
             sd_SPL = sd(SPL, na.rm = TRUE)
             )
+   
+# Reorganizing the summarized dataframe created above to combine the mean and sd into the same column. 
 Acoustics <- Acoustics %>% # changing labels back to their original state for the table here.
-    mutate(Sex = case_when(Sex == "F" ~ "Females", 
-                           Sex == "NPM" ~ "Non-pregnant males", 
-                           Sex == "PM" ~ "Pregnant males"))
-# transpose(l, fill=NA, ignore.empty=FALSE, keep.names=NULL, make.names=NULL)
-
-Acoustics_t <- transpose(Acoustics, keep.names = "Acoustic Variable") #transpose data frame
-Acoustics_t
-#redefine row and column names
-#rownames(Acoustics_t) <- colnames(Acoustics)
-#colnames(Acoustics_t) <- rownames(Acoustics)
-#display transposed data frame
-#Acoustics_t
-
-
+  mutate(Sex = case_when(Sex == "F" ~ "Females", 
+                         Sex == "NPM" ~ "Non-pregnant males",
+                         Sex == "PM" ~ "Pregnant males")) %>% 
+  unite(mean_SVL, sd_SVL, col = "snout_vent_length", sep = " ± ") %>% 
+  unite(mean_mass, sd_mass, col = "mass", sep = " ± ") %>% 
+  unite(mean_ND, sd_ND, col = "note_duration", sep =" ± ") %>% 
+  unite(mean_CD, sd_CD, col = "call_duration", sep = " ± ") %>% 
+  unite(mean_DF, sd_DF, col = "dominant_frequencey", sep =" ± ") %>% 
+  unite(mean_AggE, sd_AggE, col = "aggregate_entropy", sep = " ± ") %>% 
+  unite(mean_AvgE, sd_AvgE, col = "average_entropy", sep = " ± ") %>% 
+  unite(mean_CRR, sd_CRR, col = "call_repitition_rate", sep = " ± ") %>% 
+  unite(mean_SPL, sd_SPL, col = "sound_pressure_level", sep = " ± ") %>% 
+  transpose(keep.names = "Acoustic Variable") # flipping the orientation of the table so Sex will be at the top
+# adding the F.stat table to the Acoustic table
+F.stat <- F.stat %>% transpose(keep.names = "Acoustic_Variable")# flipping orientation
+F.stat # printing to ensure it worked
+Acoustics <- mutate(Acoustics, F_value = F.stat$V1) %>% # adding the F-values to the Acoustics table
+  rename("F" = V1, "NPM" = V2, "PM" = V3) # renaming the Acoustics data table columns 
+Acoustics %>% # printing the final data table, using kable to make it look nice :)
+  kable(align = 'l', booktabs = TRUE) %>% # left aligned data
+  kable_styling(font_size = 11, full_width = TRUE) # font-size
+detach(package:data.table)
 ```
-
+# Need to round the output of functions.
 
 
 ### Figure 3: (**a**) Note Duration, (**b**) Call Duration, (**c**) Dominant Frequency for males and females of *Rhinoderma darwinii.*\
-[Inferential statistical analysis]
+**Inferential statistical analysis**
 ```{r Serrano_et_al_2020_Fig3, echo=FALSE, width="300px", message=FALSE}
 include_graphics("images/Serrano_et_al_2020_Fig3.png")
 ```
@@ -504,19 +540,19 @@ Whiskers represent the 90th and 10th percentiles.
 require(cowplot)
 # A Boxplot of Note Duration
 fig3_A <- ggplot(data = df, aes(x = Sex, y = ND)) + # made the object
-  geom_boxplot() + # boxplot
-  labs(x = "Sex", y = "Note Duration (s)", title = "A" ) + # axis labels and title with figure label
+  geom_boxplot(na.rm = TRUE) + # boxplot
+  labs(x = "Sex", y = "Note Duration (s)", title = "A") + # axis labels and title with figure label
   scale_y_continuous(breaks = c(0.15, 0.20, 0.25, 0.30), # so axis matches that in the article
                      position = 'left') +
   theme_classic()
 # B Boxplot of Call Duration
 fig3_B <- ggplot(data = df, aes(x = Sex, y = CD)) + 
-  geom_boxplot() + 
+  geom_boxplot(na.rm = TRUE) + 
   labs(x = "Sex", y = "Call Duration (s)", title = "B") +  # scaling didn't work here. RIP
   theme_classic()
 # C Boxplot of Dominant Frequency 
 fig3_C <- ggplot(data = df, aes(x = Sex, y = DF)) + #define object
-  geom_boxplot() + # boxplot
+  geom_boxplot(na.rm = TRUE) + # boxplot
   labs(x = "Sex", y = "Dominant Frequency (Hz)", title = "C") + # axis labels and title with figure label, couldn't get the y-axis label to match here either.
   theme_classic()
 # organize the output of figures using cowplot
@@ -526,27 +562,33 @@ detach(package:cowplot)
 
 
 ### Figure 4: Linear Discrimination functions (LD1 and LD2) representing distinctiveness in *Rhinoderma darwinii* advertisement calls.\
+**visualization**
 ```{r Serrano_et_al_2020_Fig4, echo=FALSE, width="300px", message=FALSE}
 include_graphics("images/Serrano_et_al_2020_Fig4.png")
 ```
-
-• one visualization
 filter data for 4 notes per call (NC == 4, n = 22). drop_na() 
 using `MASS::lda()` Linear Discriminant Analysis
 LD1 = f and npm, 
 LD2 = f and pm
 
 groups + x1 + x2
-```{r linear discriminant analysis}
+```{r linear discriminant analysis, message=FALSE, warning=FALSE}
+require(MASS)
 df <- df %>% drop_na(DF, ND, CRR, `Agg Entropy`, SPL)
-# lda0 <- MASS::lda(Sex ~ DF + ND + CRR + `Agg Entropy` + SPL, data = df) 
+Sex1 <- df %>% dplyr::filter(Sex != "PM") # filtering for only females and nonpregnant males
+Sex2 <- df %>%  dplyr::filter(Sex != "NPM") # filtering for only females and pregnant males
+lda1 <- MASS::lda(Sex ~ DF + ND + CRR + `Agg Entropy` + SPL, data = Sex1) 
+LD1 <- lda1$scaling
+  
 # normalize : subtract mean, divide by SD, 
+
+detach(package:MASS)
 ```
 
 
 ## Summary/Discussion
 Narrative section that overviews how successful were you at replicating the analyses and visualizations in the study.\
-1. What problems did you encounter?  Some of the data described in the methods isn't included in the data frame. 
+1. What problems did you encounter?  Some of the data described in the methods isn't included in the data frame. Transformations (how, for what analyses, and which variables) not inclduded in the methods
 2. Why might you have encountered those problems?  
 3. What details were lacking from the original study's methods that might have hampered your ability to replicate the authors' results?  
 
