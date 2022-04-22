@@ -1,6 +1,6 @@
 ---
 title: "data-analysis-replication"
-author: "SLCornett"
+author: "Savvy Cornett"
 date: "14 April 2022"
 output: 
   html_document: 
@@ -31,6 +31,8 @@ knitr::opts_chunk$set(
   fig.align = "center" # centers any images on the page
 )
 ```
+
+**Spring 2022 ANT388 Applied Data Analysis**
 
 # Darwins Frog Monomorphic Call Structure and Dimorphic Vocal Phenology\
 ```{r Preliminaries, message=FALSE, warning=FALSE}
@@ -66,10 +68,10 @@ They investigated this with a population of southern *R. darwinii* on Chiolé Is
 The Serrano et al. (2020) used *Simple Pearson correlations* to explore the association used to explore association between **acoustic variables of the calls (CRR, SPL, CD, NC, ND, DF)** with **physical characteristic variables (SVL, weight)** (data not shown in article). They used *Spearman correlations* to determine the association between **acoustic properties of the calls of pregnant males** and the **number of tadpoles in their vocal sacs** (data not shown in article). The authors used an *ANOVA* to investigate the differences in acoustic variables depended on the relative body size of the sexes (Table 1), then they conducted a discriminant function analysis (DFA) for the note duration, dominant frequency, sound pressure level, and aggregated entropy of 4-notes calls (the most common call structure), then analyzed using two linear discriminant vectors (LD) (Figure 4) (Serrano et al., 2020). 
 
 #### **results**\
-Ultimately, Serrano et al. (2020) found females, who have larger body size (SVL and weight) than both male sexes, had longer note duration and call duration than any males (Table 1, Figure 3), and, even when data was corrected for SVL, no acoustic variable had a significant difference between the sexes, based on their ANOVA (Table 1), suggesting body size explains any variation among the acoustic variables and a monomorphic call structure. They also found a negative relationship between number of tadpoles in the vocal sacs of pregnant males and their call amplitude, indicating the advertising call of pregnant males is attenuated by an increased number of tadpoles AND could be an auditory indicator of tadpoles thus could be used for selecting a mate (data not shown;  just very cool! This is something several other students and I studied with the first author of this paper in the field in 2019)! Ultimately, they propose mutual selective pressures of the different sexes might contribute to social recognition and sexual status recognition (i.e., recognition of reporoductive state, active or not) of individuals (Serrano et al., 2020).
+Ultimately, Serrano et al. (2020) found females, who have larger body size (SVL and weight) than both male sexes, had longer note duration and call duration than any males (Table 1, Figure 3), and, even when data was corrected for SVL, no acoustic variable had a significant difference between the sexes, based on their ANOVA (Table 1), suggesting body size explains any variation among the acoustic variables and a monomorphic call structure. They also found a negative relationship between number of tadpoles in the vocal sacs of pregnant males and their call amplitude, indicating the advertising call of pregnant males is attenuated by an increased number of tadpoles AND could be an auditory indicator of tadpoles thus could be used for selecting a mate (data not shown;  just very cool! This is something several other students and I studied with the first author of this paper in the field in 2019)! Ultimately, they propose mutual selective pressures of the different sexes might contribute to social recognition and sexual status recognition (i.e., recognition of reproductive state, active or not) of individuals (Serrano et al., 2020).
 
 ### **data replication**\
-I will be replicating the descriptive statistic analysis of the qqPlots, Simple Pearson Correlation, Simple Spearman correlation to explore normality trends in the data, just as the authors did, and ANOVA presented in Table 1 of Serrano et al. (2020). THen I will be replicating the Inferential statistical analysis of acoustic variables note duration, call duration, and  dominant frequency (figure 3). Lastly, I will replicate the linear discrimination analysis of 5 acoustic variables (Dominant Frequency, Call Rate, Note Duration, Aggregated entropy, and Sound Pressure Level) (figure 4).
+In this report, I replicate the descriptive statistic analysis of the qqPlots, Simple Pearson Correlation, Simple Spearman correlation to explore normality trends in the data, just as the authors did, as well as the Mean ± Standard Deviations and ANOVA presented in Table 1 of Serrano et al., (2020). Then I replicate the Tukey Post-hoc test and Inferential statistical analysis of acoustic variables note duration, call duration, and  dominant frequency (figure 3). Lastly, I will replicate the linear discrimination analysis of 5 acoustic variables (Dominant Frequency, Call Rate, Note Duration, Aggregated entropy, and Sound Pressure Level) (figure 4).
 
 
 ## visualization of data\
@@ -526,10 +528,10 @@ detach(package:data.table)
 ```{r Serrano_et_al_2020_Fig3, echo=FALSE, width="300px", message=FALSE}
 include_graphics("images/Serrano_et_al_2020_Fig3.png")
 ```
-
+Note: the article doesn't specify what a or b mean as p-values represented in this figure. 
 
 **Significance in Boxplots**\
-need to get p-values somehow and include them here. 
+Here, I pull the p-values from the ANOVAs I conducted for reference.I also conduct Tukey Post-Hoc Honest Significan Difference tests to get the p-values represented in Figure 3.
 ```{r ANOVA p-values and post-hoc}
 # Pulling Out P-values from ANOVA calculations
 nd.p_value <- ND_sex.F$p.value # note duration
@@ -688,10 +690,13 @@ detach(package:MASS)
 
 
 ## Summary/Discussion\
-1. What problems did you encounter? \
+1. What problems did you encounter?\
+2. Why might you have encountered those problems?\
+3. What details were lacking from the original study's methods that might have hampered your ability to replicate the authors' results?\
+I was able to successfully replicate the three data figures shown above, and, all things considered, the largest obstacle I faced was vagueness in the methods describing the data analysis. Despite mentioning using Box-Cox transformations to transform the acoustic variables not meeting normality criteria based on the QQ Plots and Spearman and Pearson Correlations, I have no idea what variables they transformed. Based on the results I got from comparing both transformed and untransformed variables in ANOVAs and in LDA, they didn't transform any of their acoustic variables for either. Additionally, I might have uncovered some errors or mysteries in their data analysis, so, in my replication, I explicitly state when I found an issue and how I followed the methods of the authors in light of it. The first error I found was in the number of female frogs they report in their dataset: according to Table 1, there are 10 females, but only 9 are present in the data. The second mysterious error I encountered was in the DFA dataset, created by the authors for the DFA analyses including the LDA I replicated: I found an extra frog in this data set who is not in the main dataset. THough I could have corrected this error (and if you see the commit history you can see where I attempted to correct this), if I did, all my generated F-values from the ANOVAs and subsequent replications would no longer match the results the authors report in their paper. I would say all the issues I encountered could maybe have been avoided if the statistical/data analysis methods in the paper included more specific details about how data was handled, such as which variables were transformed and how. I also think it would have helped if all the data depicted in the paper, like Figure 1 on the raw counts of frogs during their field study and the raw acoustic data from Figures 2 and 5, was included in the data set. My take home from this project is that I should provide an abundant amount of detail about how I wrangle my data when I do research, as well as keeping thorough records on all my data so I can keep track of everything. 
+
 Some of the data described in the methods isn't included in the data frame. Transformations (how, for what analyses, and which variables) not included in the methods\
-2. Why might you have encountered those problems?\    
-3. What details were lacking from the original study's methods that might have hampered your ability to replicate the authors' results?  \
+
 
 ## References\
 • Sandmeier, F. (2016). *Rhinoderma darwinii* [Encyclopedia]. AmphibiaWeb; University of California, Berkeley, CA, USA. <https://amphibiaweb.org/species/4322>\
