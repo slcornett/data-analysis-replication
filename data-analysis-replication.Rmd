@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 ```
 
 # Darwins Frog Monomorphic Call Structure and Dimorphic Vocal Phenology\
-```{r Preliminaries, message=FALSE}
+```{r Preliminaries, message=FALSE, warning=FALSE}
 #require = will install and load, library can only load installed packages
 require(tidyverse)
 require(ggplot2) # pretty plots
@@ -72,11 +72,13 @@ I will be replicating the descriptive statistic analysis of the qqPlots, Simple 
 
 ## visualization of data\
 **load in dataset:**
-```{r load in dataset}
+```{r load in dataset d}
+# dataset
 f <- "https://raw.githubusercontent.com/slcornett/data-analysis-replication/main/data/Serrano_et_al_2020_MPMH.csv"
 d <- read_csv(f, col_names = TRUE, show_col_types = FALSE) # show column names, hides dataframe message details
 d <- d %>% mutate(CRR = (Calls5min/5))# creating calls per minute call repetition rate for ease in future calculations
 ```
+
 ### data summary statistics
 ```{r data summary}
 # Data summary 
@@ -90,8 +92,7 @@ s %>% dplyr::filter(skim_type == "character") %>%
 s %>% dplyr::filter(skim_type == "numeric") %>%
   dplyr::select(skim_variable, n_missing, numeric.mean, numeric.sd, numeric.p0, numeric.p25, numeric.p50, numeric.p75, numeric.p100, numeric.hist) %>%
   kable(align = 'l', booktabs = TRUE) %>% # left aligned data
-  kable_styling(font_size = 11, full_width = TRUE) # font-size
-
+  kable_styling(font_size = 11, full_width = TRUE)  # font-size
 detach(package:skimr)
 ```
 #### Abbreviation definitions:\
@@ -118,7 +119,7 @@ detach(package:skimr)
   • RMS Amp = Root Mean Square Amplitude\
   • CRR = Call Repetition Rate (Calls/min, i.e., Calls5min/5)
   
-#### exploratory statistics and comparisons of data:
+### exploratory statistics and comparisons of data:
 ```{r Exploratory Plots, message=FALSE, warning=FALSE}
 require(cowplot) # for grid plotting
 # not included in article as a graph but i think it's nice to show for reference to the methods
@@ -173,11 +174,9 @@ p5 <- ggplot(data = d, aes(x = as.factor(Larvas), y = `RMS Amp`, color = Larvas)
 plot_grid(p1, p2, p3, p4, p5, label_size = 8, nrow = 3)
 ```
 
-## Statistical Replications/Reanalysis
->Be sure to **thoroughly** explain what replications you are doing and comment your code so that it is easy for a reader to understand.  
-Include in this section relevant tables/figures/values from the original paper for comparison to what you accomplished with your replication.  
-Note that I want you to do the bulk of any *exposition* using text and markdown syntax outside of code blocks. That is, your document should not just be one big code block with ***R*** style comments but rather a nicely formatted report with code separated from exposition, interpretation, and discussion.]\
 
+## Statistical Replications/Reanalysis
+First, I am making a working dataset (df) so I do not change the original data. I also prepare three sub-datasets filtered by sex, but, since I only use the one for pregnant males (p.males), I comment out the others, so you can see how I coded them, but they don't clutter the environment nor this report.
 ```{r selecting variables and organizing data by sex}
 # making a dataframe of the relevant variables so don't change the original dataset. 
 df<- d %>% dplyr::select(Nombre, Sex, Larvas, LHC, Peso, Calls5min, CRR, NC, ND, CD, DF, SPL, `RMS Amp`, `Agg Entropy`, `Avg Entropy`)
@@ -186,10 +185,9 @@ df <- df %>%
     mutate(Sex = case_when(Sex == "Females" ~ "F", 
                            Sex == "Non-pregnant males" ~ "NPM", 
                            Sex == "Pregnant males" ~ "PM"))
-print(df) %>% 
+df %>% 
   kable(align = 'l', booktabs = TRUE) %>% # left aligned data
-  kable_styling(font_size = 10, full_width = TRUE) # font-size# checking work
-
+  kable_styling(font_size = 10, full_width = TRUE)  # font-size# checking work
 # dividing df by sex so easier to access variables. Commented  out the ones i don't actually need in the replication. 
 # np.males <- df %>% dplyr::filter(Sex == "Non-pregnant males") #Non-pregnant males (N = 11) 
 # head(np.males) 
@@ -200,18 +198,50 @@ head(p.males)
 ```
 
 
-### Table 1: Average ± SD of Body Size and Acoustic Features for *R. darwinii*\
-[descriptive statistical analysis]
-```{r Serrano_et_al_2020_Table1, echo=FALSE, width="300px", message=FALSE}
-include_graphics("images/Serrano_et_al_2020_Table1.png")
+### quantile-quantile plots\
+Serrano et al. (2020) first verified the normality criteria for all the variables in their data using quantile-quantile plots, likely to determine if any of their variables needed to be transformed before analyzing them with ANOVAs. Though they do not show these plots in their paper, I am replicating them below because the authors do not report which variables were transformed nor do they report how they were transformed, other than stating they used the Box Cox transformation.
+```{r qq plots, message=FALSE, warning=FALSE}
+require(ggpubr) # for qqplots
+require(cowplot) # for wrapping the plots
+#QQ Plots, will show warnings because there are NAs in the data. this is fine. 
+qp1 <- ggqqplot(df$LHC, title = "Snout-Vent Length (mm) QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # normal
+qp2 <- ggqqplot(df$Peso, title = "Weight (g) QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # normal
+qp3 <- ggqqplot(df$Calls5min, title = "Call Rate Interval (Calls/5min) QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # normal and looks exactly the same as CRR variable!
+qp4 <- ggqqplot(df$CRR, title = "Call Repetition Rate (Calls/min) QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # derived this from Calls5min, normal 
+qp5 <- ggqqplot(df$NC, title = "Notes per Call QQ Polt")  + 
+  font("title", size = 10, color = "dark green", face = "bold") # normal
+qp6 <- ggqqplot(df$ND, title = "Note Duration (s) QQPlot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # normal
+qp7 <- ggqqplot(df$CD, title = "Call Duration (s) QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # normal
+qp8 <- ggqqplot(df$DF, title = "Dominant Frequency (Hz) QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # normal
+qp9 <- ggqqplot(df$SPL, title = "Sound Pressure Level (dB) QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # normal
+qp10 <- ggqqplot(df$`Agg Entropy`, title = "Aggregate Entropy QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # not normal
+qp11 <- ggqqplot(df$`Avg Entropy`, title = "Average Entropy QQ Plot") + 
+  font("title", size = 10, color = "dark green", face = "bold") # not normal
+
+#plotting qq plots all together
+plot_grid(qp1, qp2, qp3, qp4, label_size = 8, nrow = 2)
+plot_grid(qp5, qp6, qp7, qp8, label_size = 8, nrow = 2)
+plot_grid(qp9, qp10, qp11, label_size = 8, nrow = 1)
+
+#detaching unneeded packages 
+detach(package:ggpubr)
+detach(package:cowplot)
 ```
+Based on these plots, the two variables that appear to not fit the normality criteria for ANOVA are the two acoustic variables of entropy (**Average Entropy** and **Aggregated Entropy**). As the authors describe in their Statistical methods, I will transform these data useing a `boxcox()` from the {MASS} package to determine how to best transform these variables for linear discriminate analysis in my Figure 4 replication.\
 
 
-#### correlation tests
-The authors reported performing the following statistical analyses before performing their ANOVA. As mentioned before, they used **Simple Pearson Correlations** to determine if the different acoustic variables correlate with either **Snout-Vent Length (LHC, mm)** or **mass (g)** (Serrano et al., 2020). They also performed **Spearman Correlations** to determine an association between acoustic variables and the number of tadpoles in the vocal sacs of pregnant males (Serrano et al., 2020). Below, I conduct these tests. Ultimately, I do not find them as informative as the QQ Plots  above. 
+### correlation tests\
+The authors reported performing the following statistical analyses before performing their ANOVA. As mentioned before, they used **Simple Pearson Correlations** to determine if the different acoustic variables correlate with either **Snout-Vent Length (LHC, mm)** or **mass (g)** (Serrano et al., 2020). They also performed **Spearman Correlations** to determine an association between acoustic variables and the number of tadpoles in the vocal sacs of pregnant males (Serrano et al., 2020). Below, I conduct these tests.
 ```{r correlation tests}
-# SHOULD I TAKE THESE OUT? THEY AREN'T VERY INFORMATIVE. 
-
 # Pearson correlations between snout-vent length and acoustic variables
 # Snout Vent Length (LHC, mm) vs Note Duration (s)
 stats::cor.test(df$LHC, df$ND, method = "pearson") # no correlation
@@ -263,51 +293,18 @@ stats::cor(p.males$Larvas, p.males$`RMS Amp`, method = "spearman") # no correlat
 stats::cor(p.males$Larvas, p.males$CRR, method = "spearman") # no correlation
 ```
 
-#### quantile-quantile plots
-Serrano et al. (2020) first verified the normality criteria for all the variables in their data using quantile-quantile plots, likely to determine if any of their variables needed to be transformed before analyzing them with ANOVAs. Though they do not show these plots in their paper, I am replicating them below because the authors do not report which variables were transformed nor do they report how they were transformed, other than stating they used the Box Cox transformation.
-```{r qq plots, message=FALSE, warning=FALSE}
-require(ggpubr) # for qqplots
-require(cowplot) # for wrapping the plots
-#QQ Plots, will show warnings because there are NAs in the data. this is fine. 
-qp1 <- ggqqplot(df$LHC, title = "Snout-Vent Length (mm) QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # normal
-qp2 <- ggqqplot(df$Peso, title = "Weight (g) QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # normal
-qp3 <- ggqqplot(df$Calls5min, title = "Call Rate Interval (Calls/5min) QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # normal and looks exactly the same as CRR variable!
-qp4 <- ggqqplot(df$CRR, title = "Call Repetition Rate (Calls/min) QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # derived this from Calls5min, normal 
-qp5 <- ggqqplot(df$NC, title = "Notes per Call QQ Polt")  + 
-  font("title", size = 10, color = "dark green", face = "bold") # normal
-qp6 <- ggqqplot(df$ND, title = "Note Duration (s) QQPlot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # normal
-qp7 <- ggqqplot(df$CD, title = "Call Duration (s) QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # normal
-qp8 <- ggqqplot(df$DF, title = "Dominant Frequency (Hz) QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # normal
-qp9 <- ggqqplot(df$SPL, title = "Sound Pressure Level (dB) QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # normal
-qp10 <- ggqqplot(df$`Agg Entropy`, title = "Aggregate Entropy QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # not normal
-qp11 <- ggqqplot(df$`Avg Entropy`, title = "Average Entropy QQ Plot") + 
-  font("title", size = 10, color = "dark green", face = "bold") # not normal
 
-#plotting qq plots all together
-plot_grid(qp1, qp2, qp3, qp4, label_size = 8, nrow = 2)
-plot_grid(qp5, qp6, qp7, qp8, label_size = 8, nrow = 2)
-plot_grid(qp9, qp10, qp11, label_size = 8, nrow = 1)
-
-#detaching unneeded packages 
-detach(package:ggpubr)
-detach(package:cowplot)
+### Table 1: Average ± SD of Body Size and Acoustic Features for *R. darwinii*\
+[descriptive statistical analysis]
+```{r Serrano_et_al_2020_Table1, echo=FALSE, width="300px", message=FALSE}
+include_graphics("images/Serrano_et_al_2020_Table1.png")
 ```
-Based on these plots, the two variables that appear to not fit the normality criteria for ANOVA are the two acoustic variables of entropy (**Average Entropy** and **Aggregated Entropy**). As the authors describe in their Statistical methods, I will transform these data useing a `boxcox()` from the {MASS} package to determine how to best transform these variables for ANOVA.
 
 
-#### Box-Cox transformations for non-normal variables in ANOVA
-Here, I run Box-Cox transformation for linear models/ANOVAS to determine how to transform variables not fitting normality criterion based on qqplot. The `boxcox()` function computes and plots the log-likelihood for an `object` to show the exponent power ($\lambda$) the response variable in the `object` should be raised to transform the `object` to fit normality criteria for comparison in ANOVA. Based on the QQ plots above, the variables not meeting normality criteria are **Avg Entropy** and **Agg Entropy**, so I ran Box-Cox transformations on them to determine how to transform them for ANOVA. For each variable, I plotted the output to visualize what exponential power I should transform the variables, and added the transformed variables into the working dataframe (df).\
+#### Box-Cox transformations for non-normal variables\
+Here, I run Box-Cox transformation for further analysis ofthe acoustic variables to determine how to transform variables not fitting normality criterion based on qqplot. The `boxcox()` function computes and plots the log-likelihood for an `object` to show the exponent power ($\lambda$) the response variable in the `object` should be raised to transform the `object` to fit normality criteria for comparison in ANOVA. Based on the QQ plots above, the variables not meeting normality criteria are **Avg Entropy** and **Agg Entropy**, so I ran Box-Cox transformations on them to determine how to transform them for ANOVA. For each variable, I plotted the output to visualize what exponential power I should transform the variables, and added the transformed variables into the working dataframe (df).\
 Below are the arguments used in this function:\
-  • The `object` argument is the response variables (**Avg Entropy** and **Agg Entropy**) against the predictor variables (**Sex** or **Sex**+**Snout-Vent Length (LHC)**) that will be compared in an ANOVA (or in a linear model, but not doing that here).
+  • The `object` argument is the response variables (**Avg Entropy** and **Agg Entropy**) against the predictor variables (**Sex** or **Sex**+**Snout-Vent Length (LHC)**) that will be compared in an ANOVA (or in a linear model, but not doing that here).\
   • The `lambda` argument is the vector values to check as potential exponential powers to raise the variable to in a transformation. By default, the function uses (-2, 2) with 0.1 interval steps. Functionally, this is the x variable in the plot output.\
   • `plotit = ` is a logical argument, and when it is set to `TRUE`, it will output a plot of   the 95% confidence log-likelihood curve. Setting it to `FALSE` prints all the the x vakues and y values separately.\
   • `interp` = is a logical argument controlling if the *spline interpolation* is used or not. The spline interpolation fits low-degree polynomials to small subsets of the values, instead of fitting a single, high-degree polynomial to all of the values at once. You should use `TRUE` if plotting data with a lambda less than 100.\
@@ -315,8 +312,9 @@ Below are the arguments used in this function:\
   • `xlab` = defaults to $\lambda$  (I used the default).\
   • `ylab` = defaults to "log-likelihood" (I used the default).\
 Below, you will see where I conducted these transformations on both the one-way model (Entropy ~ Sex) and the two-way model (Entropy ~ Sex+Snout-vent length); however, after running the ANOVAs on these acoustic variables, I found the authors did not use the comparisons of the acoustic variables to the different sexes corrected for SVL to generate their F-values. For this reason, I commented out those boxcox functions where I calculated how to transform the entropy variables for the two-way model below but you can see below how they would have worked and how I would have added those transformations to the working dataframe (df).
-```{r boxcox transformation of non-normal variables for ANOVA}
-require(MASS) # reported used for normalizing data for ANOVA
+```{r boxcox transformation of non-normal variables}
+require(MASS) # reported used for normalizing data
+
 # boxcox of agg entropy vs sex.
 boxcox(df$`Agg Entropy` ~ df$Sex, lambda = seq(-2, 2, 1/10), plotit = TRUE, # "object" 
        interp = TRUE, eps = 1/50, xlab = expression(lambda), #interp TRUE gives slightly lower lambda (like 0.9 vs 0.8 with FALSE)
@@ -340,14 +338,15 @@ df <- df %>% mutate(AvgE_t1 = (`Agg Entropy`)^(-1/10)) # adding column of transf
 ```
 
 
-#### Acoustic Variables (response variable) vs Sex (predictor variable)\
+### Acoustic Variables (response variable) vs Sex (predictor variable)\
 In the methods, the authors reported using {car} package for Anova function (though they do not report the type). To replicate this, I started by working with the two entropy variables I found how to best transform for them to meet normality criteria of ANOVA. I have commented out the work with these variables that produced incorrect F-values, relative to that reported in Table 1. Such work includes running a one-way and two-way Anova model with transformed **Agg Entropy** against the sexes and against the sexes corrected for snout-vent length. I did the same with Avg Entropy. I also determined what type (I, II, or III) of ANOVA the authors used below, as you can see for the **Agg Entropy** and **Avg Entropy**. For these two variables, since the F-values and Sums of Squares of the untransformed Agg Entropy vs Sex for three types of ANOVA are the same regardless of the type, meaning the variables are balanced and factors are orthogonal, I proceeded with the remaining acoustic variables by just running the `aov()` function. This seemed fruitful as for each variable, I successfully replicated the exact F-value and level of significance reported in Table 1 by the authors.\
-Below, for each acoustic variable included in Table 1, I do the following: 
+
+Below, for each acoustic variable included in Table 1, I do the following: \
 1. I make an ANOVA model (using the `aov()` function) of the acoustic variable to see if it varies between the three sexes (female (F), pregnant male (MP), non-pregnant male (NMP). Sex is the predictor variable, and the acoustic variable is the response variable. Moreover, for Table 1, the authors do NOT correct by snout-vent length (i.e., Sex+SVL) as conducting this correction in the model gives a different F-value than what the authors report in table 1.:\
-`aov(data = df, [acoustic variable] ~ Sex)` 
+`aov(data = df, [acoustic variable] ~ Sex)` \
 2. I then print the full summary of the original ANOVA model using the `summary.aov()`\
-3. then I pull out the F-value from the model summary, filtering for the variable **Sex** since I am comparing the acoustic variable between the three sexes
-4. I print the omnibus F-value so show that it has been isolated.
+3. then I pull out the F-value from the model summary, filtering for the variable **Sex** since I am comparing the acoustic variable between the three sexes\
+4. I print the omnibus F-value so show that it has been isolated, then compile all F-stats in a dataframe so I can later add it to the same table as the mean ± SD tables. 
 ```{r ANOVA to generate F value for comparison of different sexes}
 # Snout-Vent Length (mm) between different Sexes.
 SVL_sex <- aov(data = df, LHC ~ Sex) # SVL = LHC
@@ -457,22 +456,34 @@ SPL_sex.F$statistic # SPL F-value
 # dataframe of all the omnibus F-values from the above ANOVAs plus two empty columns so it will align with the Acoustics table below
 F.stat <- data.frame(sex = " ", #will correspond with sex
                      n = " ", # will correspond with sex pop size
-                     svl.F = SVL_sex.F$statistic, # snout-vent length
-                     mass.F = mass_sex.F$statistic, # mass
-                     nd.F = ND_sex.F$statistic, # note duration
-                     cd.F = CD_sex.F$statistic, # call duration
-                     df.F = DF_sex.F$statistic, # dominant frequency
-                     aggE.F = AggE_sex.F$statistic, # aggregated entropy
-                     avgE.F = AvgE_sex.F$statistic, # avg entropy
-                     crr.F = CRR_sex.F$statistic, # call rep rate
-                     spl.F = SPL_sex.F$statistic) # sound pressure level
-F.stat
+                     # as.numeric because the empty columns created by the two arguments above make the data all factor/characters, not numeric.
+                     svl.F = as.numeric(SVL_sex.F$statistic), # snout-vent length
+                     mass.F = as.numeric(mass_sex.F$statistic), # mass
+                     nd.F = as.numeric(ND_sex.F$statistic), # note duration
+                     cd.F = as.numeric(CD_sex.F$statistic), # call duration
+                     df.F = as.numeric(DF_sex.F$statistic), # dominant frequency
+                     aggE.F = as.numeric(AggE_sex.F$statistic), # aggregated entropy
+                     avgE.F = as.numeric(AvgE_sex.F$statistic), # avg entropy
+                     crr.F = as.numeric(CRR_sex.F$statistic), # call rep rate
+                     spl.F = as.numeric(SPL_sex.F$statistic)) # sound pressure level
+
+# using mutate_at() from {dplyr} rounding the numeric variables to 3 decimal places
+F.stat <- F.stat %>% 
+  # vars () selecting the variables/columns to selectively mutate
+  mutate_at(vars(svl.F, mass.F, nd.F, cd.F, df.F, aggE.F, avgE.F, crr.F, spl.F), 
+            round, digits = 3) # round to 3 digits
+# sapply(as.numeric(F.stat[3:11, 2]), round, digits = 2) -> also works 
+F.stat # printing to check the it worked
 detach(package:MASS)
 ```
 
 
-#### Mean, SD, and F statistic of weight, snout-vent length, and acoustic variables by Sex
-Here, I replicate the Mean and Standard Deviations reported for each acoustic variable for each sex in Table 1. I do this by 
+#### Mean, SD, and F statistic of weight, snout-vent length, and acoustic variables by Sex\
+Here, I replicate the Mean and Standard Deviations reported for each acoustic variable for each sex in Table 1. I do this by first grouping the variables in my working dataframe (df) by Sex using the `group_by` function in the {dplyr} package. I do the following in one line of code, with the different steps piped together:\
+  1. I then create a new table called **Acoustics**, where I summarize the mean and standard deviation for each variable for each sex.\
+  2. I mutate the **Acoustics** table to round all the decimal points to 2 digits, using the `mutate_at()` function from the {dplyr} package.\
+  3. I mutate the **Sex** back to the non-abbreviated version (F = Females, NPM = Non-pregnant males, PM = Pregnant males).\
+  4. I use the `unite()` function in {tidyr} 
 ```{r Mean ± SD, message=FALSE, warning=FALSE}
 #for making nice tables and doing data table manipulations
 require(data.table)
@@ -487,45 +498,60 @@ Acoustics <- bySex %>%
             mean_ND = mean(ND, na.rm = TRUE), # mean note duration (s)
             sd_ND = sd(ND, na.rm = TRUE), # sd note duration
             mean_CD = mean(CD, na.rm = TRUE), # mean call duration (s)
-            sd_CD =  sd(CD, na.rm = TRUE),
+            sd_CD =  sd(CD, na.rm = TRUE), # sd call duration
             mean_DF = mean(DF, na.rm = TRUE), # mean dominant freq (Hz)
-            sd_DF = sd(DF, na.rm = TRUE),
+            sd_DF = sd(DF, na.rm = TRUE), # dominant freq (Hz)
             mean_AggE = mean(`Agg Entropy`, na.rm = TRUE), # mean Aggregated Entropy
-            sd_AggE = sd(`Agg Entropy`, na.rm = TRUE),
+            sd_AggE = sd(`Agg Entropy`, na.rm = TRUE), # sd agg entropy
             mean_AvgE = mean(`Avg Entropy`, na.rm = TRUE), # mean Average Entropy
-            sd_AvgE = sd(`Avg Entropy`, na.rm = TRUE),
+            sd_AvgE = sd(`Avg Entropy`, na.rm = TRUE), # sd avg entropy
             mean_CRR = mean(CRR, na.rm = TRUE), # mean Call/min 
-            sd_CRR = sd(CRR, na.rm = TRUE),
+            sd_CRR = sd(CRR, na.rm = TRUE), # sd CRR
             mean_SPL = mean(SPL, na.rm = TRUE), # mean sound pressure level  (dB)
-            sd_SPL = sd(SPL, na.rm = TRUE)
-            )
-   
-# Reorganizing the summarized dataframe created above to combine the mean and sd into the same column. 
-Acoustics <- Acoustics %>% # changing labels back to their original state for the table here.
+            sd_SPL = sd(SPL, na.rm = TRUE) # sd SPL (dB)
+            ) %>% 
+# rounding all the variables to 2 decimal points. vars() for selecting the variables/columns to selectively mutate
+  mutate_at(vars(mean_SVL, sd_SVL, # SVL
+                 mean_mass, sd_mass, # Mass
+                 mean_ND, sd_ND, # note duration
+                 mean_CD, sd_CD, # call duration
+                 mean_DF, sd_DF, # dominant frequency
+                 mean_AggE, sd_AggE, # Aggregated entropy
+                 mean_AvgE, sd_AvgE, # Avg entropy
+                 mean_CRR, sd_CRR, # call rep rate
+                 mean_SPL, sd_SPL), # sound pressure level
+            round, digits = 2) %>% # round to 2 digits
+   # changing labels back to their original state for the table here.
   mutate(Sex = case_when(Sex == "F" ~ "Females", 
                          Sex == "NPM" ~ "Non-pregnant males",
                          Sex == "PM" ~ "Pregnant males")) %>% 
-  unite(mean_SVL, sd_SVL, col = "snout_vent_length", sep = " ± ") %>% 
-  unite(mean_mass, sd_mass, col = "mass", sep = " ± ") %>% 
-  unite(mean_ND, sd_ND, col = "note_duration", sep =" ± ") %>% 
-  unite(mean_CD, sd_CD, col = "call_duration", sep = " ± ") %>% 
-  unite(mean_DF, sd_DF, col = "dominant_frequencey", sep =" ± ") %>% 
+  # putting the mean ± SD into one column per variables
+  unite(mean_SVL, sd_SVL, col = "snout_vent_length (mm)", sep = " ± ") %>% 
+  unite(mean_mass, sd_mass, col = "mass (g)", sep = " ± ") %>% 
+  unite(mean_ND, sd_ND, col = "note_duration (s)", sep =" ± ") %>% 
+  unite(mean_CD, sd_CD, col = "call_duration (s)", sep = " ± ") %>% 
+  unite(mean_DF, sd_DF, col = "dominant_frequency (Hz)", sep =" ± ") %>% 
   unite(mean_AggE, sd_AggE, col = "aggregate_entropy", sep = " ± ") %>% 
   unite(mean_AvgE, sd_AvgE, col = "average_entropy", sep = " ± ") %>% 
-  unite(mean_CRR, sd_CRR, col = "call_repitition_rate", sep = " ± ") %>% 
-  unite(mean_SPL, sd_SPL, col = "sound_pressure_level", sep = " ± ") %>% 
-  transpose(keep.names = "Acoustic Variable") # flipping the orientation of the table so Sex will be at the top
-# adding the F.stat table to the Acoustic table
+  unite(mean_CRR, sd_CRR, col = "call_repitition_rate (calls/min)", sep = " ± ") %>% 
+  unite(mean_SPL, sd_SPL, col = "sound_pressure_level (dB)", sep = " ± ") %>% 
+  # flipping the orientation of the table so Sex will be at the top
+  transpose(keep.names = "Acoustic Variable") # from {data.table}
+
+# flipping the orientation so it will match the Acoustic table
 F.stat <- F.stat %>% transpose(keep.names = "Acoustic_Variable")# flipping orientation
-F.stat # printing to ensure it worked
+# F.stat # printing to ensure it worked
+# adding the F.stat table to the Acoustic table
 Acoustics <- mutate(Acoustics, F_value = F.stat$V1) %>% # adding the F-values to the Acoustics table
   rename("F" = V1, "NPM" = V2, "PM" = V3) # renaming the Acoustics data table columns 
-Acoustics %>% # printing the final data table, using kable to make it look nice :)
-  kable(align = 'l', booktabs = TRUE) %>% # left aligned data
-  kable_styling(font_size = 11, full_width = TRUE) # font-size
+
+# printing the final data table
+Acoustics %>% # , using kable to make it look nice :)
+  kable(caption = "Replicated Average ± standard deviation of body size and acoustic features for R. darwinii", align = 'l', booktabs = TRUE) %>%
+  kable_styling(font_size = 12, full_width = TRUE) %>% # font-size
+  footnote(general = "F-values indicate ANOVA comparisons between sexes. Significance F-values include the following: Snout-vent length `**`, Mass `***`, note duration `*`, call duration `**`, dominant frequency `*`. Significance values are the following: `*` p<0.05, `**` p<0.01, and `***` p<0.001.")
 detach(package:data.table)
 ```
-# Need to round the output of functions.
 
 
 ### Figure 3: (**a**) Note Duration, (**b**) Call Duration, (**c**) Dominant Frequency for males and females of *Rhinoderma darwinii.*\
@@ -534,8 +560,21 @@ detach(package:data.table)
 include_graphics("images/Serrano_et_al_2020_Fig3.png")
 ```
 
-#### Boxplots of Acoustic Variables across Different Sexes with Post-hoc Tukey significance\
-Whiskers represent the 90th and 10th percentiles. 
+**Significance in Boxplots**\
+need to get p-values somehow and include them here. 
+```{r p-values from ANOVA}
+# Note Duration
+nd.p_value
+
+SVL_sex.F$p.value
+mass_sex.F$p.value), # mass
+                     nd.F = as.numeric(ND_sex.F$statistic), # note duration
+                     cd.F = as.numeric(CD_sex.F$statistic), # call duration
+                     df.F = as.numeric(DF_sex.F$statistic), # dominant frequency
+```
+
+
+#### Boxplots of Acoustic Variables across Different Sexes\
 ```{r Figure3 replication, message=FALSE, warning=FALSE}
 require(cowplot)
 # A Boxplot of Note Duration
@@ -566,6 +605,8 @@ detach(package:cowplot)
 ```{r Serrano_et_al_2020_Fig4, echo=FALSE, width="300px", message=FALSE}
 include_graphics("images/Serrano_et_al_2020_Fig4.png")
 ```
+
+
 filter data for 4 notes per call (NC == 4, n = 22). drop_na() 
 using `MASS::lda()` Linear Discriminant Analysis
 LD1 = f and npm, 
@@ -574,10 +615,11 @@ LD2 = f and pm
 groups + x1 + x2
 ```{r linear discriminant analysis, message=FALSE, warning=FALSE}
 require(MASS)
-df <- df %>% drop_na(DF, ND, CRR, `Agg Entropy`, SPL)
+DFA <- df %>% filter(Nombre = "350", "352", "Ele", )
+  drop_na(DF, ND, CRR, AggE_t1, SPL)
 Sex1 <- df %>% dplyr::filter(Sex != "PM") # filtering for only females and nonpregnant males
 Sex2 <- df %>%  dplyr::filter(Sex != "NPM") # filtering for only females and pregnant males
-lda1 <- MASS::lda(Sex ~ DF + ND + CRR + `Agg Entropy` + SPL, data = Sex1) 
+lda1 <- MASS::lda(Sex ~ DF + ND + CRR + AggE_t1 + SPL, data = Sex1) 
 LD1 <- lda1$scaling
   
 # normalize : subtract mean, divide by SD, 
