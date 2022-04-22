@@ -51,7 +51,7 @@ require(skimr) # for data overview, data visualization
 ```
 
 
-## introduction:\
+## introduction\
 [Include a brief summary of the paper you are reanalyzing data from (e.g., the overall objective of the paper, the types of data collected and how sampling was done, what the main results were) and lay out what you intend to replicate.]\
 ```{r echo=FALSE, out.width="100%", message=FALSE}
 include_graphics("images/Cornett_2019_Darwin's_Frog.JPG") #cool frog photo by me
@@ -180,8 +180,8 @@ plot_grid(p1, p2, p3, p4, p5, label_size = 8, nrow = 3)
 ```
 
 
-## Statistical Replications/Reanalysis
-First, I am making a working dataset (df) so I do not change the original data. I also prepare three sub-datasets filtered by sex, but, since I only use the one for pregnant males (p.males), I comment out the others, so you can see how I coded them, but they don't clutter the environment nor this report.
+## statistical replications & reanalysis
+First, I make a working dataset (df) so I do not change the original data. I also prepare three sub-datasets filtered by sex, but, since I only use the one for pregnant males (p.males), I comment out the others, so you can see how I coded them, but they don't clutter the environment nor this report.
 ```{r selecting variables and organizing data by sex}
 # making a dataframe of the relevant variables so don't change the original dataset. 
 df<- d %>% 
@@ -205,7 +205,7 @@ head(p.males)
 
 
 ### quantile-quantile plots\
-Serrano et al. (2020) first verified the normality criteria for all the variables in their data using quantile-quantile plots, likely to determine if any of their variables needed to be transformed before analyzing them with ANOVAs. Though they do not show these plots in their paper, I am replicating them below because the authors do not report which variables were transformed nor do they report how they were transformed, other than stating they used the Box Cox transformation.
+Serrano et al. (2020) first verified the normality criteria for all the variables in their data using quantile-quantile plots, likely to determine if any of their variables needed to be transformed before analyzing them with ANOVAs. Though they do not show these plots in their paper, I replicate and re-analyse them below because the authors do not report which variables were transformed nor do they report how they were transformed, other than stating they used the Box Cox transformation.
 ```{r qq plots, message=FALSE, warning=FALSE}
 require(ggpubr) # for qqplots
 require(cowplot) # for wrapping the plots
@@ -590,7 +590,7 @@ Serrano et al., (2020) conducted a Discriminant Function Analysis (DFA) to estim
 
 **load in DFA dataset** Here, I am loading in the DFA dataset and am repeating the modifications I made to d and df for the replication and analyses in the above sections. 
 ```{r DFA dataset, message=FALSE, warning=FALSE}
-# dataset
+# DFA dataset
 f1 <- "https://raw.githubusercontent.com/slcornett/data-analysis-replication/main/data/Serrano_et_al_2020_MPMH_DFA.csv"
 d1 <- read_csv(f1, col_names = TRUE, show_col_types = FALSE)  # show column names, hides dataframe message details
 d1 <- d1 %>% mutate(CRR = (Calls5min/5))  # creating calls per minute call repetition rate for ease in future calculations
@@ -679,26 +679,26 @@ require(MASS)
 lda <- MASS::lda(Sex ~ centered_DF + centered_CRR + centered_ND + centered_aggE + centered_SPL, data = DFA)
 lda # printing the results
 
-plot(lda, 
+# plotting the results of the LD1 vs LD2 (visualization)
+plot(lda, # model
      main = "Replicated LDA of Advertising Call Distinctiveness by Sex",
      sub = " F = Females, PM = Pregnant males, NPM = Non-pregnant males",
-     xlab = "LD1 (96.3%)",
-     ylab = "LD2 (3.7%)")
+     xlab = "LD1 (96.3%)", #writing in the % explained by LD1
+     ylab = "LD2 (3.7%)") # writing in the % explained by LD2
 
 detach(package:MASS)
 ```
 
 
-## Summary/Discussion\
+## summary/discussion\
 1. What problems did you encounter?\
 2. Why might you have encountered those problems?\
 3. What details were lacking from the original study's methods that might have hampered your ability to replicate the authors' results?\
+
 I was able to successfully replicate the three data figures shown above, and, all things considered, the largest obstacle I faced was vagueness in the methods describing the data analysis. Despite mentioning using Box-Cox transformations to transform the acoustic variables not meeting normality criteria based on the QQ Plots and Spearman and Pearson Correlations, I have no idea what variables they transformed. Based on the results I got from comparing both transformed and untransformed variables in ANOVAs and in LDA, they didn't transform any of their acoustic variables for either. Additionally, I might have uncovered some errors or mysteries in their data analysis, so, in my replication, I explicitly state when I found an issue and how I followed the methods of the authors in light of it. The first error I found was in the number of female frogs they report in their dataset: according to Table 1, there are 10 females, but only 9 are present in the data. The second mysterious error I encountered was in the DFA dataset, created by the authors for the DFA analyses including the LDA I replicated: I found an extra frog in this data set who is not in the main dataset. THough I could have corrected this error (and if you see the commit history you can see where I attempted to correct this), if I did, all my generated F-values from the ANOVAs and subsequent replications would no longer match the results the authors report in their paper. I would say all the issues I encountered could maybe have been avoided if the statistical/data analysis methods in the paper included more specific details about how data was handled, such as which variables were transformed and how. I also think it would have helped if all the data depicted in the paper, like Figure 1 on the raw counts of frogs during their field study and the raw acoustic data from Figures 2 and 5, was included in the data set. My take home from this project is that I should provide an abundant amount of detail about how I wrangle my data when I do research, as well as keeping thorough records on all my data so I can keep track of everything. 
 
-Some of the data described in the methods isn't included in the data frame. Transformations (how, for what analyses, and which variables) not included in the methods\
 
-
-## References\
+## references\
 • Sandmeier, F. (2016). *Rhinoderma darwinii* [Encyclopedia]. AmphibiaWeb; University of California, Berkeley, CA, USA. <https://amphibiaweb.org/species/4322>\
 
 • Serrano, J. M., Penna, M., Valenzuela-Sánchez, A., Mendez, M. A., & Azat, C. (2020). Monomorphic call structure and dimorphic vocal phenology in a sex-role reversed frog. _Behavioral Ecology and Sociobiology, 74_(10), 127. <https://doi.org/10.1007/s00265-020-02903-3>\
